@@ -17,10 +17,8 @@ async function freePort(){
 function eventWhere(socket,event,predicate,timeout=5000){
  return new Promise((resolve,reject)=>{
   const timer=setTimeout(()=>{socket.off(event,onEvent);reject(new Error('Timed out waiting for '+event))},timeout);
-  function onEvent(data){if(!predicate(data))return;clearTimeout(timer);resolve(data)}
+  function onEvent(data){if(!predicate(data))return;clearTimeout(timer);socket.off(event,onEvent);resolve(data)}
   socket.on(event,onEvent);
-  const cleanup=()=>socket.off(event,onEvent);
-  timer.unref?.();
  });
 }
 async function waitForHealth(url,child){
