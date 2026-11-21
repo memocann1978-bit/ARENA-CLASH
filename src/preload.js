@@ -1,0 +1,2 @@
+const {contextBridge,ipcRenderer}=require('electron');
+contextBridge.exposeInMainWorld('arenaAPI',{checkUpdate:()=>ipcRenderer.invoke('check-update'),downloadUpdate:()=>ipcRenderer.invoke('download-update'),installUpdate:()=>ipcRenderer.invoke('install-update'),on:(channel,callback)=>{const allowed=['update-available','update-none','update-progress','update-downloaded','update-error'];if(allowed.includes(channel))ipcRenderer.on(channel,(_event,...args)=>callback(...args));}});
