@@ -86,7 +86,7 @@ function loop(now){
  if(seconds<=0||blueTower<=0||redTower<=0){active=false;toast(redTower<=0||(seconds<=0&&blueTower>redTower)?'ZAFER!':'MAÇ SONA ERDİ');return}raf=requestAnimationFrame(loop);
 }
 $('arena').onclick=e=>{
- if(!active||selected<0)return;const r=e.target.getBoundingClientRect();let x=(e.clientX-r.left)/r.width*1100,y=(e.clientY-r.top)/r.height*620;const u=units[selected];
+ if(!active||selected<0)return;const r=e.target.getBoundingClientRect();let x=(e.clientX-r.left)/r.width*620,y=(e.clientY-r.top)/r.height*1100;const u=units[selected];
  if(onlineMode){
   const serverX=1100-y,serverY=x;
   if((onlineTeam==='blue'&&y<555)||(onlineTeam==='red'&&y>545)||x<35||x>585){toast('Birliklerini kendi alanına yerleştir.');return}
