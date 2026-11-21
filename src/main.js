@@ -1,10 +1,18 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const { autoUpdater } = require('electron-updater');
 const { io } = require('socket.io-client');
-let win, socket, serverUrl='https://YOUR-ARENA-CLASH-SERVER.onrender.com';
+let win, socket, playerId, serverUrl='https://YOUR-ARENA-CLASH-SERVER.onrender.com';
 function send(channel,...args){if(win&&!win.isDestroyed())win.webContents.send(channel,...args)}
+function loadPlayerId(){
+ const file=path.join(app.getPath('userData'),'player.json');
+ try{const saved=JSON.parse(fs.readFileSync(file,'utf8'));if(typeof saved.playerId==='string'&&/^[a-f0-9-]{36}$/i.test(saved.playerId))return saved.playerId}catch{}
+ const id=crypto.randomUUID();
+ try{fs.writeFileSync(file,JSON.stringify({playerId:id}),{mode:0o600})}catch{}
+ return id;
+}
 function createWindow(){win=new BrowserWindow({width:1440,height:900,minWidth:1100,minHeight:700,backgroundColor:'#080d19',autoHideMenuBar:true,show:false,webPreferences:{preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false}});win.loadFile(path.join(__dirname,'index.html'));win.once('ready-to-show',()=>win.show())}
 function connectOnline(url){
  if(typeof url!=='string'||!/^https?:\/\//i.test(url))return {error:'Sunucu adresi https:// ile başlamalı.'};
@@ -18,6 +26,7 @@ function connectOnline(url){
 }
 app.whenReady().then(()=>{
  try{const saved=JSON.parse(fs.readFileSync(path.join(app.getPath('userData'),'online.json'),'utf8'));if(saved.serverUrl)serverUrl=saved.serverUrl}catch{}
+ playerId=loadPlayerId();
  createWindow();
  autoUpdater.autoDownload=false;
  autoUpdater.on('update-available',info=>send('update-available',info.version));
@@ -29,7 +38,7 @@ app.whenReady().then(()=>{
  ipcMain.handle('download-update',()=>autoUpdater.downloadUpdate());
  ipcMain.handle('install-update',()=>autoUpdater.quitAndInstall());
  ipcMain.handle('online:connect',(_e,url)=>{const result=connectOnline(url||serverUrl);if(!result.error){try{fs.writeFileSync(path.join(app.getPath('userData'),'online.json'),JSON.stringify({serverUrl:url||serverUrl}))}catch{}}return result});
- ipcMain.handle('online:join',(_e,name)=>{if(!socket?.connected)return {error:'Sunucuya bağlı değilsin.'};socket.emit('profile:load',{name});socket.emit('match:join',{name});return {ok:true}});
+ ipcMain.handle('online:join',(_e,name)=>{if(!socket?.connected)return {error:'Sunucuya bağlı değilsin.'};socket.emit('profile:load',{name,playerId});socket.emit('match:join',{name,playerId});return {ok:true}});
  ipcMain.handle('online:play',(_e,payload)=>{if(socket?.connected)socket.emit('card:play',payload)});
  ipcMain.handle('online:leave',()=>{if(socket?.connected)socket.emit('match:leave')});
 });
