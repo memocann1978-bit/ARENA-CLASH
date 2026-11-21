@@ -66,11 +66,20 @@ $('findMatch').onclick=async()=>{if(!onlineConnected){toast('Önce sunucuya bağ
 window.arenaAPI.on('online:connected',()=>{onlineConnected=true;$('onlineStatus').textContent='BAĞLI';$('onlineStatus').style.color='#68e5ad';$('onlineMessage').textContent='Sunucuya bağlandın. Rakip arayabilirsin.'});
 window.arenaAPI.on('online:error',e=>{$('onlineMessage').textContent='Bağlantı hatası: '+e;onlineConnected=false;$('onlineStatus').textContent='HATA'});
 window.arenaAPI.on('online:disconnected',()=>{onlineConnected=false;$('onlineStatus').textContent='BAĞLANTI KESİLDİ';if(onlineMode){active=false;toast('Sunucu bağlantısı kesildi.')}}); 
+function updateProfile(data){
+ if(!data)return;
+ $('profileName').textContent=data.name||'Oyuncu';
+ $('profileWins').textContent=Number(data.wins)||0;
+ $('profileMatches').textContent=(Number(data.wins)||0)+(Number(data.losses)||0);
+ $('profileTrophies').textContent=Number(data.trophies)||0;
+ $('profileLeague').textContent='Acemi I · '+(Number(data.trophies)||0)+' Kupa';
+}
 window.arenaAPI.on('online:event',(event,data)=>{
+ if(event==='profile:data')updateProfile(data);
  if(event==='match:queued'){$('onlineMessage').textContent='Rakip aranıyor… sıradasın.'}
  if(event==='match:found'){onlineTeam=data.team;onlineQueued=false;$('onlineMessage').textContent='Rakip bulundu! Maç başlıyor.';start(true);toast('Rakip bulundu!')}
  if(event==='match:state'&&onlineMode){entities=data.units||[];blueTower=data.towers.blue;redTower=data.towers.red;seconds=data.time;energy=data.energy[onlineTeam]||0;$('energy').textContent=energy;$('timer').textContent='0'+Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');drawArena()}
- if(event==='match:finished'){active=false;onlineMode=false;$('match').classList.add('hidden');const won=data.winner===onlineTeam;toast(won?'ÇEVRİMİÇİ ZAFER!':'MAĞLUBİYET · Tekrar dene');$('onlineMessage').textContent=won?'Maçı kazandın!':'Maçı kaybettin.';onlineQueued=false}
+ if(event==='match:finished'){active=false;onlineMode=false;$('match').classList.add('hidden');const won=data.winner===onlineTeam;const myProfile=(data.profiles||[]).find(p=>p.name===($('playerName').value.trim()||'Oyuncu'));if(myProfile)updateProfile(myProfile);toast(won?'ÇEVRİMİÇİ ZAFER!':'MAĞLUBİYET · Tekrar dene');$('onlineMessage').textContent=won?'Maçı kazandın!':'Maçı kaybettin.';onlineQueued=false}
  if(event==='match:left'){$('onlineMessage').textContent='Eşleştirmeden ayrıldın.'}
 });
 $('checkUpdate').onclick=async()=>{toast('Güncellemeler kontrol ediliyor…');const r=await window.arenaAPI.checkUpdate();if(r?.error)toast('Güncelleme kontrol edilemedi.');else if(!r.available)toast('Oyunun güncel.')};
