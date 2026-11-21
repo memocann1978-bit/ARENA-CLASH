@@ -75,6 +75,7 @@ function updateProfile(data){
  $('profileLeague').textContent='Acemi I · '+(Number(data.trophies)||0)+' Kupa';
 }
 window.arenaAPI.on('online:event',(event,data)=>{
+ if(event==='server:error'){toast(data?.message||'Sunucu isteği reddetti.');return}
  if(event==='profile:data')updateProfile(data);
  if(event==='match:queued'){$('onlineMessage').textContent='Rakip aranıyor… sıradasın.'}
  if(event==='match:found'){onlineTeam=data.team;onlineQueued=false;$('onlineMessage').textContent='Rakip bulundu! Maç başlıyor.';start(true);toast('Rakip bulundu!')}
