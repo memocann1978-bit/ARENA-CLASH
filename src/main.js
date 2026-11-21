@@ -21,7 +21,7 @@ function connectOnline(url){
  socket.on('connect',()=>send('online:connected'));
  socket.on('connect_error',e=>send('online:error',e.message));
  socket.on('disconnect',reason=>send('online:disconnected',reason));
- for(const event of ['profile:data','match:queued','match:found','match:state','match:finished','match:left'])socket.on(event,data=>send('online:event',event,data));
+ for(const event of ['profile:data','match:queued','match:found','match:state','match:finished','match:left'])socket.on(event,data=>{if(event==='match:finished'&&Array.isArray(data?.profiles)){const mine=data.profiles.find(p=>p.id===playerId);if(mine)send('online:event','profile:data',mine)}send('online:event',event,data)});
  return {connecting:true};
 }
 app.whenReady().then(()=>{
