@@ -10,7 +10,7 @@ const {CARDS,sanitizePlayerName,validatePlacement}=require('./game-rules');
 const {loadProfiles,saveProfiles}=require('./profile-store');
 const {createRateLimiter}=require('./rate-limiter');
 const rateLimiters={profile:createRateLimiter({limit:5,windowMs:10000}),join:createRateLimiter({limit:3,windowMs:10000}),play:createRateLimiter({limit:8,windowMs:1000}),leave:createRateLimiter({limit:3,windowMs:1000})};
-function allowEvent(socket,event){const allowed=rateLimiters[event](socket.id);if(!allowed)socket.emit('server:error',{code:'RATE_LIMIT',message:'Çok hızlı işlem yapıyorsun. Biraz bekle.'});return allowed}
+function allowEvent(socket,event){const allowed=rateLimiters[event](socket);if(!allowed)socket.emit('server:error',{code:'RATE_LIMIT',message:'Çok hızlı işlem yapıyorsun. Biraz bekle.'});return allowed}
 const queue=[];const rooms=new Map();const profiles=loadProfiles(process.env.ARENA_DATA_FILE);
 function validPlayerId(value){return typeof value==='string'&&/^[a-f0-9-]{36}$/i.test(value)?value:null}
 function profile(id,name){if(!profiles.has(id)){profiles.set(id,{id,name:sanitizePlayerName(name),wins:0,losses:0,trophies:0});saveProfiles(profiles,process.env.ARENA_DATA_FILE)}else{const p=profiles.get(id);p.name=sanitizePlayerName(name||p.name)}return profiles.get(id)}
