@@ -34,5 +34,7 @@ The updater checks GitHub Releases from a packaged build. Development builds do 
 ## Current implementation notes
 - Offline mode: local player versus basic bot.
 - Online mode: Socket.IO matchmaking, two-player rooms, server-side card placement validation, authoritative troop combat/tower health, match result events.
-- The online server currently keeps player statistics in memory; accounts, durable cloud saves, ranked seasons, anti-cheat hardening, and production operations are not implemented yet.
+- The desktop client now keeps a stable random player ID in its local app data, and the server writes profile statistics to an atomic JSON file (`ARENA_DATA_FILE` can override its path).
+- File-based server profiles survive ordinary process restarts only when the host preserves that file. Ephemeral hosting can erase them on redeploy/restart; configure persistent storage before treating these as durable cloud saves.
+- Full account authentication, cross-device account recovery, ranked seasons, anti-cheat hardening, and production operations are not implemented yet.
 - This is an actively developed early prototype, not a finished commercial game. Test online play with two clients after deploying the server.
