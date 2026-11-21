@@ -11,7 +11,11 @@ const CARDS=[
  {id:'guard',name:'Muhafız',icon:'🛡️',cost:3,hp:150,speed:35,damage:18,range:35},
  {id:'mage',name:'Alev Büyücüsü',icon:'🔥',cost:4,hp:85,speed:25,damage:34,range:115},
  {id:'shadow',name:'Gölge',icon:'🗡️',cost:2,hp:65,speed:75,damage:25,range:30},
- {id:'siege',name:'Kuşatma',icon:'💣',cost:5,hp:110,speed:18,damage:48,range:150}
+ {id:'siege',name:'Kuşatma',icon:'💣',cost:5,hp:110,speed:18,damage:48,range:150},
+ {id:'archer',name:'Okçu',icon:'🏹',cost:3,hp:75,speed:42,damage:24,range:125},
+ {id:'knight',name:'Şövalye',icon:'⚔️',cost:4,hp:230,speed:28,damage:30,range:38},
+ {id:'golem',name:'Taş Dev',icon:'🪨',cost:6,hp:390,speed:13,damage:42,range:42},
+ {id:'healer',name:'Şifacı',icon:'✨',cost:4,hp:95,speed:30,damage:10,range:90}
 ];
 function profile(id,name){if(!profiles.has(id))profiles.set(id,{id,name:String(name||'Oyuncu').slice(0,18),wins:0,losses:0,trophies:0});return profiles.get(id)}
 function snapshot(room){return {id:room.id,players:room.players.map(p=>({id:p.id,name:p.name,team:p.team})),units:room.units.map(u=>({...u})),towers:{blue:room.towers.blue,red:room.towers.red},energy:{blue:Math.floor(room.energy.blue),red:Math.floor(room.energy.red)},time:Math.max(0,Math.ceil(room.time)),status:room.status}}
