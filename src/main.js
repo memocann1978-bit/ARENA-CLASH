@@ -1,0 +1,7 @@
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const path = require('path');
+const { autoUpdater } = require('electron-updater');
+let win;
+function createWindow(){win=new BrowserWindow({width:1440,height:900,minWidth:1100,minHeight:700,backgroundColor:'#080d19',autoHideMenuBar:true,show:false,webPreferences:{preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false}});win.loadFile(path.join(__dirname,'index.html'));win.once('ready-to-show',()=>win.show());}
+app.whenReady().then(()=>{createWindow();autoUpdater.autoDownload=false;autoUpdater.on('update-available',info=>win?.webContents.send('update-available',info.version));autoUpdater.on('update-not-available',()=>win?.webContents.send('update-none'));autoUpdater.on('download-progress',p=>win?.webContents.send('update-progress',Math.round(p.percent)));autoUpdater.on('update-downloaded',()=>win?.webContents.send('update-downloaded'));autoUpdater.on('error',e=>win?.webContents.send('update-error',e.message));ipcMain.handle('check-update',async()=>{try{const r=await autoUpdater.checkForUpdates();return {available:!!r?.isUpdateAvailable,version:r?.updateInfo?.version};}catch(e){return {error:e.message};}});ipcMain.handle('download-update',()=>autoUpdater.downloadUpdate());ipcMain.handle('install-update',()=>autoUpdater.quitAndInstall());});
+app.on('window-all-closed',()=>{if(process.platform!=='darwin')app.quit();});app.on('activate',()=>{if(BrowserWindow.getAllWindows().length===0)createWindow();});
