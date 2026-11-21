@@ -9,7 +9,7 @@ const units=[
  {id:'golem',name:'Taş Dev',icon:'🪨',cost:6,hp:390,speed:13,damage:42,range:42},
  {id:'healer',name:'Şifacı',icon:'✨',cost:4,hp:95,speed:30,damage:10,range:90}
 ];
-let selected=-1,energy=5,seconds=120,active=false,entities=[],last=0,raf=0,enemySpawn=4,enemyEnergy=5;
+let selected=-1,handCards=[0,1,2,3],nextCard=4,energy=5,seconds=120,active=false,entities=[],last=0,raf=0,enemySpawn=4,enemyEnergy=5;
 let blueTower=500,redTower=500,onlineMode=false,onlineTeam='blue',onlineConnected=false,onlineQueued=false;
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2300)}
 function page(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$(p+'Page').classList.add('active');document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x.dataset.page===p));$('pageTitle').textContent=({battle:'SAVAŞ ARENASI',deck:'KART DESTEN',online:'ÇEVRİMİÇİ 1v1',profile:'OYUNCU PROFİLİ',settings:'AYARLAR'})[p]}
@@ -65,9 +65,15 @@ function drawArena(){
  ctx.textAlign='center';ctx.font='bold 11px Segoe UI';ctx.fillStyle='#fff';ctx.fillText('◆',310,550);
 }
 function renderHand(){
- $('nextCard').textContent=units[(selected+1+units.length)%units.length].icon;
- $('hand').innerHTML=units.map((u,i)=>'<button class="hand-card '+(selected===i?'selected':'')+'" data-i="'+i+'"><span>'+u.icon+'</span><b>'+u.name+'</b><small>◆ '+u.cost+'</small></button>').join('');
+ $('nextCard').textContent=units[nextCard].icon;
+ $('hand').innerHTML=handCards.map((cardIndex,slot)=>{const u=units[cardIndex];return '<button class="hand-card '+(selected===slot?'selected':'')+'" data-i="'+slot+'"><span>'+u.icon+'</span><b>'+u.name+'</b><small>◆ '+u.cost+'</small></button>'}).join('');
  document.querySelectorAll('.hand-card').forEach(b=>b.onclick=()=>{selected=Number(b.dataset.i);renderHand()});
+}
+function cyclePlayedCard(slot){
+ handCards[slot]=nextCard;
+ nextCard=(nextCard+1)%units.length;
+ selected=-1;
+ renderHand();
 }
 function spawn(team,index,x,y){const u=units[index];entities.push({id:'local-'+Date.now()+'-'+Math.random(),x,y,team,hp:u.hp,maxHp:u.hp,speed:u.speed,damage:u.damage,range:u.range,icon:u.icon,cooldown:0})}
 function enemyAI(dt){
@@ -86,14 +92,14 @@ function loop(now){
  if(seconds<=0||blueTower<=0||redTower<=0){active=false;toast(redTower<=0||(seconds<=0&&blueTower>redTower)?'ZAFER!':'MAÇ SONA ERDİ');return}raf=requestAnimationFrame(loop);
 }
 $('arena').onclick=e=>{
- if(!active||selected<0)return;const r=e.target.getBoundingClientRect();let x=(e.clientX-r.left)/r.width*620,y=(e.clientY-r.top)/r.height*1100;const u=units[selected];
+ if(!active||selected<0)return;const r=e.target.getBoundingClientRect();let x=(e.clientX-r.left)/r.width*620,y=(e.clientY-r.top)/r.height*1100;const slot=selected,u=units[handCards[slot]];
  if(onlineMode){
   const serverX=1100-y,serverY=x;
   if((onlineTeam==='blue'&&y<555)||(onlineTeam==='red'&&y>545)||x<35||x>585){toast('Birliklerini kendi alanına yerleştir.');return}
-  window.arenaAPI.playOnline({cardId:u.id,x:serverX,y:serverY});selected=-1;renderHand();return;
+  window.arenaAPI.playOnline({cardId:u.id,x:serverX,y:serverY});cyclePlayedCard(slot);return;
  }
  if(y<555||x<35||x>585){toast('Birliklerini kendi alanına yerleştir.');return}
- if(energy<u.cost){toast('Yeterli iksirin yok.');return}energy-=u.cost;$('energy').textContent=Math.floor(energy);$('elixirFill').style.width=(energy*10)+'%';spawn('blue',selected,x,y);selected=-1;renderHand();
+ if(energy<u.cost){toast('Yeterli iksirin yok.');return}energy-=u.cost;$('energy').textContent=Math.floor(energy);$('elixirFill').style.width=(energy*10)+'%';spawn('blue',handCards[slot],x,y);cyclePlayedCard(slot);
 };
 $('playBtn').onclick=()=>start(false);
 $('exitMatch').onclick=()=>{active=false;onlineMode=false;cancelAnimationFrame(raf);$('match').classList.add('hidden');if(onlineQueued)window.arenaAPI.leaveOnline();onlineQueued=false};
