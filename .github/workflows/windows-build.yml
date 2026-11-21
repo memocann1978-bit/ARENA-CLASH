@@ -1,4 +1,8 @@
 name: Build Windows Game
+concurrency:
+  group: arena-clash-windows-build
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]
