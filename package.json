@@ -1,0 +1,56 @@
+{
+  "name": "arena-clash",
+  "version": "0.1.0",
+  "description": "ARENA CLASH - Windows real-time card arena game",
+  "main": "src/main.js",
+  "author": "ARENA CLASH",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "electron-updater": "^6.6.2"
+  },
+  "build": {
+    "appId": "com.arenaclash.game",
+    "productName": "ARENA CLASH",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "ARENA-CLASH-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ARENA CLASH"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "memocann1978-bit",
+        "repo": "ARENA-CLASH"
+      }
+    ]
+  }
+}
