@@ -47,6 +47,11 @@ test('two clients can match, deploy a card and finish after disconnect',async()=
   await Promise.all([new Promise((resolve,reject)=>{blue.once('connect',resolve);blue.once('connect_error',reject)}),new Promise((resolve,reject)=>{red.once('connect',resolve);red.once('connect_error',reject)})]);
   const blueFound=eventWhere(blue,'match:found',()=>true);
   const redFound=eventWhere(red,'match:found',()=>true);
+  const nullProfile=eventWhere(blue,'profile:data',data=>data.name==='Oyuncu');
+  blue.emit('profile:load',null);
+  await nullProfile;
+  blue.emit('card:play',null);
+  assert.equal((await fetch(base+'/health').then(r=>r.json())).ok,true);
   const blueId='11111111-1111-4111-8111-111111111111';
   const redId='22222222-2222-4222-8222-222222222222';
   blue.emit('match:join',{name:'BlueTest',playerId:blueId});
