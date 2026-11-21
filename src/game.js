@@ -79,7 +79,7 @@ window.arenaAPI.on('online:event',(event,data)=>{
  if(event==='match:queued'){$('onlineMessage').textContent='Rakip aranıyor… sıradasın.'}
  if(event==='match:found'){onlineTeam=data.team;onlineQueued=false;$('onlineMessage').textContent='Rakip bulundu! Maç başlıyor.';start(true);toast('Rakip bulundu!')}
  if(event==='match:state'&&onlineMode){entities=data.units||[];blueTower=data.towers.blue;redTower=data.towers.red;seconds=data.time;energy=data.energy[onlineTeam]||0;$('energy').textContent=energy;$('timer').textContent='0'+Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');drawArena()}
- if(event==='match:finished'){active=false;onlineMode=false;$('match').classList.add('hidden');const won=data.winner===onlineTeam;const myProfile=(data.profiles||[]).find(p=>p.name===($('playerName').value.trim()||'Oyuncu'));if(myProfile)updateProfile(myProfile);toast(won?'ÇEVRİMİÇİ ZAFER!':'MAĞLUBİYET · Tekrar dene');$('onlineMessage').textContent=won?'Maçı kazandın!':'Maçı kaybettin.';onlineQueued=false}
+ if(event==='match:finished'){active=false;onlineMode=false;$('match').classList.add('hidden');const won=data.winner===onlineTeam;toast(won?'ÇEVRİMİÇİ ZAFER!':'MAĞLUBİYET · Tekrar dene');$('onlineMessage').textContent=won?'Maçı kazandın!':'Maçı kaybettin.';onlineQueued=false}
  if(event==='match:left'){$('onlineMessage').textContent='Eşleştirmeden ayrıldın.'}
 });
 $('checkUpdate').onclick=async()=>{toast('Güncellemeler kontrol ediliyor…');const r=await window.arenaAPI.checkUpdate();if(r?.error)toast('Güncelleme kontrol edilemedi.');else if(!r.available)toast('Oyunun güncel.')};
