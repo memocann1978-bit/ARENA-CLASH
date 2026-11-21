@@ -8,7 +8,7 @@
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --win nsis",
-    "test": "node --check src/main.js && node --check src/preload.js && node --check src/game.js && node --check server/index.js && node --check server/game-rules.js && node --test server/game-rules.test.js"
+    "test": "node --check src/main.js && node --check src/preload.js && node --check src/game.js && node --check server/index.js && node --check server/game-rules.js && node --check server/profile-store.js && node --test server/game-rules.test.js server/profile-store.test.js"
   },
   "devDependencies": {
     "electron": "^35.0.0",
