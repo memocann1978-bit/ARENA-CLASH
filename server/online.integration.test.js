@@ -14,11 +14,13 @@ async function freePort(){
  await new Promise(resolve=>probe.close(resolve));
  return port;
 }
-function eventOnce(socket,event,timeout=5000){
+function eventWhere(socket,event,predicate,timeout=5000){
  return new Promise((resolve,reject)=>{
   const timer=setTimeout(()=>{socket.off(event,onEvent);reject(new Error('Timed out waiting for '+event))},timeout);
-  function onEvent(data){clearTimeout(timer);resolve(data)}
-  socket.once(event,onEvent);
+  function onEvent(data){if(!predicate(data))return;clearTimeout(timer);resolve(data)}
+  socket.on(event,onEvent);
+  const cleanup=()=>socket.off(event,onEvent);
+  timer.unref?.();
  });
 }
 async function waitForHealth(url,child){
@@ -54,7 +56,7 @@ test('two clients can match, deploy a card and finish after disconnect',async()=
   const [blueMatch,redMatch]=await Promise.all([blueFound,redFound]);
   assert.equal(blueMatch.team,'blue');
   assert.equal(redMatch.team,'red');
-  const state=eventOnce(blue,'match:state');
+  const state=eventWhere(blue,'match:state',data=>data.units?.length===1);
   blue.emit('card:play',{cardId:'guard',x:300,y:300});
   const firstState=await state;
   assert.equal(firstState.units.length,1);
