@@ -45,8 +45,8 @@ test('two clients can match, deploy a card and finish after disconnect',async()=
   blue=io(base,{transports:['websocket'],reconnection:false});
   red=io(base,{transports:['websocket'],reconnection:false});
   await Promise.all([new Promise((resolve,reject)=>{blue.once('connect',resolve);blue.once('connect_error',reject)}),new Promise((resolve,reject)=>{red.once('connect',resolve);red.once('connect_error',reject)})]);
-  const blueFound=eventOnce(blue,'match:found');
-  const redFound=eventOnce(red,'match:found');
+  const blueFound=eventWhere(blue,'match:found',()=>true);
+  const redFound=eventWhere(red,'match:found',()=>true);
   const blueId='11111111-1111-4111-8111-111111111111';
   const redId='22222222-2222-4222-8222-222222222222';
   blue.emit('match:join',{name:'BlueTest',playerId:blueId});
@@ -59,7 +59,7 @@ test('two clients can match, deploy a card and finish after disconnect',async()=
   const firstState=await state;
   assert.equal(firstState.units.length,1);
   assert.equal(firstState.units[0].team,'blue');
-  const finished=eventOnce(blue,'match:finished');
+  const finished=eventWhere(blue,'match:finished',()=>true);
   red.disconnect();
   const result=await finished;
   assert.equal(result.winner,'blue');
